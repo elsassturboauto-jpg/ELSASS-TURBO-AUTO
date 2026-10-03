@@ -1,1403 +1,264 @@
+
+
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-900">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ELSASS TURBO AUTO - État du véhicule avant livraison</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ELSASS TURBO AUTO - État du véhicule</title>
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --primary: #d32f2f;
+      --text: #ffffff;
+      --text-sub: #b0b0b0;
+      --border: #333333;
+      --success: #2e7d32;
+      --warning: #ed6c02;
+      --danger: #d32f2f;
+    }
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        elsass: {
-                            red: '#E50914',
-                            darkred: '#B81D24',
-                            dark: '#141414',
-                            card: '#1F2937',
-                            border: '#374151',
-                            accent: '#FF4500'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text); padding-bottom: 30px; }
 
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    header { background: #000; padding: 15px; text-align: center; border-bottom: 3px solid var(--primary); }
+    header h1 { color: var(--primary); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+    header p { color: var(--text-sub); font-size: 0.9rem; }
 
-    <style>
-        /* Custom UI & Print Styles */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
+    .container { max-width: 900px; margin: 0 auto; padding: 15px; }
+    .card { background: var(--card-bg); border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+    h2 { color: var(--text); font-size: 1.1rem; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 5px; text-transform: uppercase; }
 
-        /* Print CSS for A4 Generation */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-zone, #print-zone * {
-                visibility: visible;
-            }
-            #print-zone {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white !important;
-                color: black !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .page-break {
-                page-break-before: always;
-            }
-            @page {
-                size: A4 portrait;
-                margin: 12mm;
-            }
-        }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
-        /* Canvas Signature Touch styling */
-        .signature-canvas {
-            touch-action: none;
-            background-color: #f9fafb;
-            border: 2px dashed #9ca3af;
-        }
+    label { display: block; font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid var(--border); color: #fff; border-radius: 6px; font-size: 1rem; margin-bottom: 10px; }
+    textarea { resize: vertical; min-height: 80px; }
 
-        /* SVG Schematic Marker Styling */
-        .car-part {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .car-part:hover {
-            opacity: 0.8;
-            stroke-width: 2px;
-            stroke: #ffffff;
-        }
-    </style>
+    .status-group { display: flex; gap: 5px; margin-bottom: 10px; }
+    .btn-status { flex: 1; padding: 12px 5px; border: none; border-radius: 6px; background: #333; color: #fff; font-weight: bold; font-size: 0.8rem; cursor: pointer; text-align: center; }
+    .btn-status.bon.active { background: var(--success); }
+    .btn-status.defaut.active { background: var(--warning); }
+    .btn-status.endommage.active { background: var(--danger); }
+
+    .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .check-item { background: #2a2a2a; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+    .check-item input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
+
+    .btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center; text-transform: uppercase; margin-top: 10px; }
+    .btn-secondary { background: #444; }
+
+    canvas.signature-pad { width: 100%; height: 150px; background: #fff; border-radius: 6px; touch-action: none; }
+
+    /* STYLES D'IMPRESSION CORRIGÉS */
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; font-size: 11pt; }
+      header, .no-print, button, input[type="file"] { display: none !important; }
+      .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      .card { background: white !important; color: black !important; border: 1px solid #ccc !important; padding: 10px !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+      h1, h2 { color: black !important; border-bottom: 1px solid #000 !important; }
+      input, select, textarea { background: white !important; color: black !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+      .btn-status { border: 1px solid #ccc !important; color: black !important; background: transparent !important; }
+      .btn-status.active { font-weight: bold !important; text-decoration: underline !important; }
+      .btn-status.bon.active { color: var(--success) !important; }
+      .btn-status.defaut.active { color: var(--warning) !important; }
+      .btn-status.endommage.active { color: var(--danger) !important; }
+      canvas.signature-pad { border: 1px solid #000 !important; }
+      
+      .print-header { display: block !important; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+      .print-header h1 { font-size: 18pt; margin-bottom: 5px; }
+      .print-header p { font-size: 10pt; }
+    }
+
+    .print-header { display: none; }
+  </style>
 </head>
-<body class="h-full text-slate-100 bg-slate-950 flex flex-col antialiased select-none">
+<body>
 
-    <!-- MAIN APPLICATION CONTAINER -->
-    <div id="app-container" class="flex flex-col h-full overflow-hidden no-print">
+  <header class="no-print">
+    <h1>ELSASS TURBO AUTO</h1>
+    <p>État du véhicule avant livraison</p>
+  </header>
 
-        <!-- HEADER BANNER -->
-        <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 shadow-lg">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showHome()">
-                <div class="bg-red-600 text-white font-black text-xl px-3 py-1.5 rounded-lg tracking-wider flex items-center gap-2 shadow-md shadow-red-900/50">
-                    <i class="fa-solid fa-gauge-high text-yellow-400"></i>
-                    <span>ELSASS TURBO AUTO</span>
-                </div>
-                <div class="hidden md:block border-l border-slate-700 pl-3">
-                    <p class="text-xs font-semibold text-slate-300 uppercase tracking-wider">État du Véhicule Avant Livraison</p>
-                    <p class="text-[10px] text-slate-500">Inspection Vendeur & Client</p>
-                </div>
-            </div>
-
-            <!-- Header Quick Controls -->
-            <div class="flex items-center space-x-2">
-                <span id="pwa-status" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800">
-                    <i class="fa-solid fa-wifi text-[10px]"></i> Hors-ligne Actif
-                </span>
-                <button onclick="app.showSettings()" class="p-2.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition active:scale-95">
-                    <i class="fa-solid fa-gear text-lg"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- DYNAMIC CONTENT VIEW WRAPPER -->
-        <main id="main-content" class="flex-1 overflow-y-auto p-3 sm:p-5">
-            <!-- Dynamic pages will load here via JavaScript -->
-        </main>
-
-        <!-- FOOTER NAV BAR (When inside inspection form) -->
-        <footer id="form-footer" class="hidden bg-slate-900 border-t border-slate-800 p-3 sm:px-6 flex items-center justify-between shrink-0">
-            <button id="btn-prev-step" onclick="app.prevStep()" class="px-5 py-3 rounded-xl bg-slate-800 text-slate-200 font-bold hover:bg-slate-700 active:scale-95 transition flex items-center gap-2 disabled:opacity-40">
-                <i class="fa-solid fa-arrow-left"></i> Précédent
-            </button>
-            
-            <div id="step-indicator" class="text-xs sm:text-sm font-semibold text-slate-400">
-                Étape <span id="current-step-num" class="text-white font-bold">1</span> / 14
-            </div>
-
-            <button id="btn-next-step" onclick="app.nextStep()" class="px-6 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-500 active:scale-95 transition shadow-lg shadow-red-900/30 flex items-center gap-2">
-                <span>Suivant</span> <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </footer>
+  <div class="container">
+    
+    <!-- En-tête visible uniquement sur le document imprimé -->
+    <div class="print-header">
+      <h1>ELSASS TURBO AUTO</h1>
+      <p>Fiche de contrôle & État du véhicule avant livraison</p>
     </div>
 
-    <!-- PRINT VIEW TEMPLATE (ONLY VISIBLE ON PRINT / EXPORT PDF) -->
-    <div id="print-zone" class="hidden">
-        <!-- Content dynamically generated at printing -->
+    <!-- BOUTONS D'ACTION (Masqués à l'impression) -->
+    <div class="card no-print">
+      <div class="grid-2">
+        <button class="btn" onclick="window.print()">🖨️ Imprimer / Sauvegarder PDF</button>
+        <button class="btn btn-secondary" onclick="resetForm()">🔄 Nouvelle Fiche</button>
+      </div>
     </div>
 
-    <!-- MODAL POPUP FOR PHOTO ENLARGEMENT OR MESSAGES -->
-    <div id="app-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
-            <h3 id="modal-title" class="text-lg font-bold text-white"></h3>
-            <div id="modal-body" class="text-slate-300 text-sm"></div>
-            <div class="flex justify-end gap-3 pt-2">
-                <button onclick="app.closeModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-semibold hover:bg-slate-700">Fermer</button>
-            </div>
+    <!-- CLIENT & VÉHICULE -->
+    <div class="card">
+      <h2>1. Informations Client & Véhicule</h2>
+      <div class="grid-2">
+        <div>
+          <label>Nom & Prénom Client</label>
+          <input type="text" id="client_nom" placeholder="M. / Mme ...">
         </div>
+        <div>
+          <label>Téléphone</label>
+          <input type="tel" id="client_tel" placeholder="06 ...">
+        </div>
+        <div>
+          <label>Véhicule (Marque & Modèle)</label>
+          <input type="text" id="vehicule_modele" placeholder="ex: VW Golf 7">
+        </div>
+        <div>
+          <label>Immatriculation</label>
+          <input type="text" id="vehicule_immat" placeholder="AA-123-BB">
+        </div>
+        <div>
+          <label>Kilométrage</label>
+          <input type="number" id="vehicule_km" placeholder="ex: 125000">
+        </div>
+        <div>
+          <label>Énergie / Carburant</label>
+          <select id="vehicule_energie">
+            <option>Essence</option>
+            <option>Diesel</option>
+            <option>Hybride</option>
+            <option>Électrique</option>
+          </select>
+        </div>
+      </div>
     </div>
 
-    <!-- JAVASCRIPT APPLICATION LOGIC -->
-    <script>
-        const APP_STORAGE_KEY = 'elsass_turbo_auto_fiches';
-        const APP_SETTINGS_KEY = 'elsass_turbo_auto_settings';
-
-        // Default inspection schema template
-        const DEFAULT_CAR_INSPECTION = {
-            id: null,
-            dossierNum: '',
-            createdAt: new Date().toISOString(),
-            status: 'Brouillon', // Brouillon, À signer, Terminé
-            
-            // Step 1: Client & Vehicle
-            client: { nom: '', prenom: '', adresse: '', telephone: '', email: '' },
-            vehicle: { marque: '', modele: '', version: '', immat: '', vin: '', km: '', dateMec: '', dateCt: '', nbCles: '2', carburant: 'Essence', boite: 'Manuelle' },
-            
-            // Step 2 & 3: Exterior Checklist & Fault Markers
-            exterior: {
-                avant: { parechocs: 'BON', capot: 'BON', phareG: 'BON', phareD: 'BON', calandre: 'BON', parebrise: 'BON', aileG: 'BON', aileD: 'BON' },
-                coteG: { aileA: 'BON', porteA: 'BON', porteAr: 'BON', basCaisse: 'BON', retro: 'BON', janteA: 'BON', pneuA: 'BON', janteAr: 'BON', pneuAr: 'BON' },
-                arriere: { parechocs: 'BON', coffre: 'BON', feuG: 'BON', feuD: 'BON', lunette: 'BON', plaque: 'BON' },
-                coteD: { aileA: 'BON', porteA: 'BON', porteAr: 'BON', basCaisse: 'BON', retro: 'BON', janteA: 'BON', pneuA: 'BON', janteAr: 'BON', pneuAr: 'BON' }
-            },
-            exteriorNotes: {}, // e.g. { 'coteG.porteA': 'Rayure de 10cm' }
-            exteriorPhotos: {}, // Base64 photos mapped to keys
-            schemaMarkers: [], // Interactive diagram click coordinates
-
-            // Step 4: Engine Bay
-            engine: { etatGeneral: 'BON', fuites: 'BON', huiles: 'BON', liquideRefroidissement: 'BON', liquideFrein: 'BON', laveGlace: 'BON', batterie: 'BON', courroie: 'BON', durites: 'BON', connecteurs: 'BON', bruitsAnormaux: 'BON', fumeeAnormale: 'BON' },
-            engineNotes: {},
-            enginePhotos: {},
-
-            // Step 5: Mechanical & Functional
-            mechanics: { demarrage: 'BON', ralenti: 'BON', acceleration: 'BON', freinage: 'BON', direction: 'BON', embrayage: 'BON', boite: 'BON', marcheArriere: 'BON', freinMain: 'BON', suspension: 'BON', pneus: 'BON', eclairage: 'BON', clignotants: 'BON', essuieGlaces: 'BON', laveGlace: 'BON', klaxon: 'BON', chauffage: 'BON', clim: 'BON', autoradio: 'BON', vitresElec: 'BON', fermCentralisee: 'BON', retrosElec: 'BON', aideStationnement: 'BON', voyantsTDB: 'BON' },
-            mechanicsNotes: {},
-
-            // Step 6: Interior
-            interior: { siegeConducteur: 'BON', siegePassager: 'BON', banquetteAr: 'BON', tableauBord: 'BON', volant: 'BON', pommeau: 'BON', garnituresPortes: 'BON', moquette: 'BON', cielToit: 'BON', coffre: 'BON', roueSecours: 'BON', equipementsSecurite: 'BON', ceintures: 'BON', airbags: 'BON', isofix: 'BON' },
-            interiorNotes: {},
-
-            // Step 7: Underbody (IMPORTANT SECTION)
-            underbody: { visualWithClient: true, fuites: 'BON', carter: 'BON', boite: 'BON', echappement: 'BON', protections: 'BON', trainAvant: 'BON', trainArriere: 'BON', freins: 'BON', durites: 'BON', suspensions: 'BON', caisse: 'BON', corrosion: 'BON', chocs: 'BON' },
-            underbodyNotes: {},
-            underbodyPhotos: {},
-
-            // Step 8: Road Test & Diagnostic
-            roadTest: { done: false, coldStart: false, braking: false, steering: false, gearbox: false, clutch: false, acceleration: false, handling: false, notes: '' },
-            diagnostic: { noAnomalies: true, engineLight: false, abs: false, airbag: false, esp: false, battery: false, oilPressure: false, temp: false, other: false, faultCodes: '', notes: '' },
-
-            // Step 9: Work Performed & Client Reserves
-            workDone: ['', '', ''], // Customizable lines
-            clientReserves: [], // Array of { id, description, location, photo }
-
-            // Step 10: Accessories Handed Over
-            accessories: { cle1: true, cle2: false, carte: false, carnet: true, factures: false, notice: false, roueSecours: false, kitAnticrevaison: true, triangle: true, gilet: true, other: '' },
-
-            // Step 11: General Photo Gallery
-            photos: [], // Array of { id, timestamp, description, dataUrl }
-
-            // Step 13: Signatures
-            signatures: { client: null, vendor: null, date: null }
-        };
-
-        class ElsassTurboApp {
-            constructor() {
-                this.currentStep = 1;
-                this.maxSteps = 14;
-                this.currentData = JSON.parse(JSON.stringify(DEFAULT_CAR_INSPECTION));
-                this.fiches = [];
-                this.settings = { companyName: 'ELSASS TURBO AUTO', address: '68000 Colmar / Mulhouse', phone: '03 89 XX XX XX', email: 'contact@elsassturboauto.fr' };
-                
-                this.init();
-            }
-
-            init() {
-                this.loadFromStorage();
-                this.showHome();
-                this.registerPWA();
-            }
-
-            loadFromStorage() {
-                try {
-                    const savedFiches = localStorage.getItem(APP_STORAGE_KEY);
-                    if (savedFiches) this.fiches = JSON.parse(savedFiches);
-                    
-                    const savedSettings = localStorage.getItem(APP_SETTINGS_KEY);
-                    if (savedSettings) this.settings = JSON.parse(savedSettings);
-                } catch (e) {
-                    console.error("Erreur chargement LocalStorage", e);
-                }
-            }
-
-            saveToStorage() {
-                try {
-                    localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(this.fiches));
-                    localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(this.settings));
-                } catch (e) {
-                    alert("Attention: Espace de stockage local saturé (photos trop volumineuses). Vider les fiches anciennes.");
-                }
-            }
-
-            generateDossierNum() {
-                const year = new Date().getFullYear();
-                const count = this.fiches.length + 1;
-                return `ETA-${year}-${String(count).padStart(4, '0')}`;
-            }
-
-            registerPWA() {
-                if ('serviceWorker' in navigator) {
-                    // Simuler Service Worker registration via Blob URL pour fonctionnement local direct
-                    const swCode = `
-                        self.addEventListener('install', e => self.skipWaiting());
-                        self.addEventListener('activate', e => self.clients.claim());
-                        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-                    `;
-                    const blob = new Blob([swCode], { type: 'application/javascript' });
-                    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-                }
-            }
-
-            showHome() {
-                document.getElementById('form-footer').classList.add('hidden');
-                const main = document.getElementById('main-content');
-                
-                const recentFichesHtml = this.fiches.slice(-5).reverse().map(f => `
-                    <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-red-500/50 transition">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-mono text-xs font-bold text-red-400 bg-red-950/60 border border-red-800/50 px-2 py-0.5 rounded">${f.dossierNum}</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${f.status === 'Terminé' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${f.status}</span>
-                            </div>
-                            <p class="font-bold text-white text-base mt-1">${f.client.nom.toUpperCase()} ${f.client.prenom}</p>
-                            <p class="text-xs text-slate-400">${f.vehicle.marque} ${f.vehicle.modele} • <span class="text-slate-200 font-mono font-bold">${f.vehicle.immat || 'SANS IMMAT'}</span> • ${new Date(f.createdAt).toLocaleDateString('fr-FR')}</p>
-                        </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <button onclick="app.resumeFiche('${f.id}')" class="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold transition flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-pen-to-square"></i> Ouvrir
-                            </button>
-                            <button onclick="app.duplicateFiche('${f.id}')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition" title="Dupliquer">
-                                <i class="fa-solid fa-copy"></i>
-                            </button>
-                            <button onclick="app.printFiche('${f.id}')" class="px-3 py-2 rounded-xl bg-red-900/60 hover:bg-red-800 text-red-200 text-xs font-bold transition" title="Imprimer / PDF">
-                                <i class="fa-solid fa-print"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('') || `<div class="text-center py-10 text-slate-500 text-sm">Aucune fiche enregistrée pour le moment.</div>`;
-
-                main.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-6">
-                        <!-- Hero Banner -->
-                        <div class="bg-gradient-to-r from-red-950/80 via-slate-900 to-slate-900 border border-red-900/40 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
-                            <div class="relative z-10 space-y-2">
-                                <div class="inline-flex items-center gap-2 bg-red-600/20 text-red-400 border border-red-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                    <i class="fa-solid fa-car-side"></i> ELSASS TURBO AUTO
-                                </div>
-                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">État du Véhicule Avant Livraison</h1>
-                                <p class="text-slate-300 text-xs sm:text-sm max-w-xl">Remplissez le contrôle contradictoire sur tablette avec le client autour du véhicule, faites signer et éditez immédiatement le document A4 conforme.</p>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button onclick="app.createNewFiche()" class="p-5 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white font-bold text-lg hover:from-red-500 hover:to-red-600 active:scale-[0.98] transition shadow-xl shadow-red-900/30 flex items-center justify-between group">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition">
-                                        <i class="fa-solid fa-plus"></i>
-                                    </div>
-                                    <div class="text-left">
-                                        <div class="font-extrabold">NOUVELLE FICHE</div>
-                                        <div class="text-xs font-normal text-red-100">Démarrer une inspection client</div>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-red-200"></i>
-                            </button>
-
-                            <button onclick="app.showFichesList('in_progress')" class="p-5 rounded-2xl bg-slate-800 border border-slate-700 text-white font-bold text-lg hover:bg-slate-750 active:scale-[0.98] transition flex items-center justify-between">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
-                                        <i class="fa-solid fa-clock-rotate-left"></i>
-                                    </div>
-                                    <div class="text-left">
-                                        <div class="font-extrabold">FICHES EN COURS</div>
-                                        <div class="text-xs font-normal text-slate-400">${this.fiches.filter(f => f.status !== 'Terminé').length} fiche(s) en attente</div>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-slate-500"></i>
-                            </button>
-                        </div>
-
-                        <!-- Recent Files List -->
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center px-1">
-                                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Dernières Inspections</h2>
-                                <button onclick="app.showFichesList('all')" class="text-xs text-red-400 font-semibold hover:underline">Voir tout (${this.fiches.length})</button>
-                            </div>
-                            <div class="space-y-2.5">
-                                ${recentFichesHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            createNewFiche() {
-                this.currentData = JSON.parse(JSON.stringify(DEFAULT_CAR_INSPECTION));
-                this.currentData.id = 'fiche_' + Date.now();
-                this.currentData.dossierNum = this.generateDossierNum();
-                this.currentStep = 1;
-                this.renderStep();
-            }
-
-            resumeFiche(id) {
-                const found = this.fiches.find(f => f.id === id);
-                if (found) {
-                    this.currentData = JSON.parse(JSON.stringify(found));
-                    this.currentStep = 1;
-                    this.renderStep();
-                }
-            }
-
-            duplicateFiche(id) {
-                const found = this.fiches.find(f => f.id === id);
-                if (found) {
-                    this.currentData = JSON.parse(JSON.stringify(found));
-                    this.currentData.id = 'fiche_' + Date.now();
-                    this.currentData.dossierNum = this.generateDossierNum();
-                    this.currentData.status = 'Brouillon';
-                    this.currentData.createdAt = new Date().toISOString();
-                    this.currentData.signatures = { client: null, vendor: null, date: null };
-                    this.currentStep = 1;
-                    this.renderStep();
-                }
-            }
-
-            saveCurrentState() {
-                const index = this.fiches.findIndex(f => f.id === this.currentData.id);
-                if (index >= 0) {
-                    this.fiches[index] = JSON.parse(JSON.stringify(this.currentData));
-                } else {
-                    this.fiches.push(JSON.parse(JSON.stringify(this.currentData)));
-                }
-                this.saveToStorage();
-            }
-
-            renderStep() {
-                document.getElementById('form-footer').classList.remove('hidden');
-                document.getElementById('current-step-num').innerText = this.currentStep;
-                document.getElementById('btn-prev-step').disabled = (this.currentStep === 1);
-                
-                const main = document.getElementById('main-content');
-                main.scrollTop = 0;
-
-                // Auto-save on step change
-                this.saveCurrentState();
-
-                switch (this.currentStep) {
-                    case 1: this.renderStep1(main); break;
-                    case 2: this.renderStep2(main); break;
-                    case 3: this.renderStep3(main); break;
-                    case 4: this.renderStep4(main); break;
-                    case 5: this.renderStep5(main); break;
-                    case 6: this.renderStep6(main); break;
-                    case 7: this.renderStep7(main); break;
-                    case 8: this.renderStep8(main); break;
-                    case 9: this.renderStep9(main); break;
-                    case 10: this.renderStep10(main); break;
-                    case 11: this.renderStep11(main); break;
-                    case 12: this.renderStep12(main); break;
-                    case 13: this.renderStep13(main); break;
-                    case 14: this.renderStep14(main); break;
-                }
-            }
-
-            nextStep() {
-                this.collectStepData();
-                if (this.currentStep < this.maxSteps) {
-                    this.currentStep++;
-                    this.renderStep();
-                }
-            }
-
-            prevStep() {
-                this.collectStepData();
-                if (this.currentStep > 1) {
-                    this.currentStep--;
-                    this.renderStep();
-                }
-            }
-
-            collectStepData() {
-                // Collect input fields dynamically if present
-                const inputs = document.querySelectorAll('[data-bind]');
-                inputs.forEach(input => {
-                    const path = input.getAttribute('data-bind').split('.');
-                    if (path.length === 2) {
-                        this.currentData[path[0]][path[1]] = input.value;
-                    } else if (path.length === 1) {
-                        this.currentData[path[0]] = input.value;
-                    }
-                });
-            }
-
-            // --- STEP 1: CLIENT & VEHICLE ---
-            renderStep1(container) {
-                const c = this.currentData.client;
-                const v = this.currentData.vehicle;
-                container.innerHTML = `
-                    <div class="max-w-3xl mx-auto space-y-6">
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-                            <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
-                                <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center font-bold">1</div>
-                                <div>
-                                    <h2 class="font-bold text-lg text-white">IDENTIFICATION CLIENT & VÉHICULE</h2>
-                                    <p class="text-xs text-slate-400">Dossier N° : <span class="font-mono text-red-400 font-bold">${this.currentData.dossierNum}</span></p>
-                                </div>
-                            </div>
-
-                            <!-- CLIENT SECTION -->
-                            <div class="space-y-3">
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
-                                    <i class="fa-solid fa-user"></i> INFORMATIONS CLIENT
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nom client *</label>
-                                        <input type="text" data-bind="client.nom" value="${c.nom}" placeholder="ex: DUPONT" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Prénom *</label>
-                                        <input type="text" data-bind="client.prenom" value="${c.prenom}" placeholder="ex: Marc" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Adresse postale</label>
-                                        <input type="text" data-bind="client.adresse" value="${c.adresse}" placeholder="Rue, Code postal, Ville" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Téléphone</label>
-                                        <input type="tel" data-bind="client.telephone" value="${c.telephone}" placeholder="06 XX XX XX XX" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">E-mail</label>
-                                        <input type="email" data-bind="client.email" value="${c.email}" placeholder="client@email.com" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- VEHICLE SECTION -->
-                            <div class="space-y-3 pt-4 border-t border-slate-800">
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
-                                    <i class="fa-solid fa-car"></i> INFORMATIONS VÉHICULE
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Marque *</label>
-                                        <input type="text" data-bind="vehicle.marque" value="${v.marque}" placeholder="ex: AUDI" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Modèle *</label>
-                                        <input type="text" data-bind="vehicle.modele" value="${v.modele}" placeholder="ex: RS3" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Version</label>
-                                        <input type="text" data-bind="vehicle.version" value="${v.version}" placeholder="ex: 2.5 TFSI Sportback" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Immatriculation *</label>
-                                        <input type="text" data-bind="vehicle.immat" value="${v.immat}" placeholder="AA-123-BB" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono uppercase font-bold text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Numéro VIN</label>
-                                        <input type="text" data-bind="vehicle.vin" value="${v.vin}" placeholder="17 caractères" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono uppercase text-sm focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Kilométrage (km) *</label>
-                                        <input type="number" data-bind="vehicle.km" value="${v.km}" placeholder="ex: 85000" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">1ère Mise en Circulation</label>
-                                        <input type="date" data-bind="vehicle.dateMec" value="${v.dateMec}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Date Contrôle Technique</label>
-                                        <input type="date" data-bind="vehicle.dateCt" value="${v.dateCt}" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nombre de clés</label>
-                                        <select data-bind="vehicle.nbCles" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                            <option value="1" ${v.nbCles === '1' ? 'selected' : ''}>1 clé</option>
-                                            <option value="2" ${v.nbCles === '2' ? 'selected' : ''}>2 clés</option>
-                                            <option value="3+" ${v.nbCles === '3+' ? 'selected' : ''}>3 clés ou +</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Carburant</label>
-                                        <select data-bind="vehicle.carburant" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                            <option value="Essence" ${v.carburant === 'Essence' ? 'selected' : ''}>Essence</option>
-                                            <option value="Gazole" ${v.carburant === 'Gazole' ? 'selected' : ''}>Gazole</option>
-                                            <option value="Hybride" ${v.carburant === 'Hybride' ? 'selected' : ''}>Hybride</option>
-                                            <option value="Électrique" ${v.carburant === 'Électrique' ? 'selected' : ''}>Électrique</option>
-                                            <option value="GPL/E88" ${v.carburant === 'GPL/E88' ? 'selected' : ''}>GPL / Ethanol</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Boîte de vitesses</label>
-                                        <select data-bind="vehicle.boite" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-base focus:border-red-500 outline-none">
-                                            <option value="Manuelle" ${v.boite === 'Manuelle' ? 'selected' : ''}>Manuelle</option>
-                                            <option value="Automatique" ${v.boite === 'Automatique' ? 'selected' : ''}>Automatique</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep2(container) {
-                const ext = this.currentData.exterior;
-
-                const renderGroup = (title, icon, keyPrefix, items) => {
-                    return `
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                            <h3 class="text-sm font-bold text-white uppercase flex items-center gap-2">
-                                <i class="${icon} text-red-500"></i> ${title}
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                ${Object.keys(items).map(itemKey => {
-                                    const fullKey = `${keyPrefix}.${itemKey}`;
-                                    const currentStatus = ext[keyPrefix][itemKey] || 'BON';
-                                    const currentNote = this.currentData.exteriorNotes[fullKey] || '';
-                                    const photo = this.currentData.exteriorPhotos[fullKey];
-
-                                    return `
-                                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 space-y-2">
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-sm font-semibold text-slate-200">${itemKey.toUpperCase()}</span>
-                                                <!-- Status Selector -->
-                                                <div class="flex items-center gap-1">
-                                                    <button onclick="app.setChecklistStatus('exterior', '${keyPrefix}', '${itemKey}', 'BON')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${currentStatus === 'BON' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-700 text-slate-400'}">🟢 BON</button>
-                                                    <button onclick="app.setChecklistStatus('exterior', '${keyPrefix}', '${itemKey}', 'DEFAUT')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${currentStatus === 'DEFAUT' ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-700 text-slate-400'}">🟠 DÉFAUT</button>
-                                                    <button onclick="app.setChecklistStatus('exterior', '${keyPrefix}', '${itemKey}', 'ENDOMMAGE')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${currentStatus === 'ENDOMMAGE' ? 'bg-red-600 text-white shadow-md' : 'bg-slate-700 text-slate-400'}">🔴 ABÎMÉ</button>
-                                                </div>
-                                            </div>
-
-                                            ${currentStatus !== 'BON' ? `
-                                                <div class="space-y-2 pt-1 border-t border-slate-700/50">
-                                                    <input type="text" placeholder="Description du défaut..." value="${currentNote}" onchange="app.setChecklistNote('exteriorNotes', '${fullKey}', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none">
-                                                    <div class="flex items-center justify-between">
-                                                        <label class="cursor-pointer bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-200 flex items-center gap-1.5 transition">
-                                                            <i class="fa-solid fa-camera"></i> ${photo ? 'Changer Photo' : 'Ajouter Photo'}
-                                                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="app.handlePhotoUpload(event, 'exteriorPhotos', '${fullKey}')">
-                                                        </label>
-                                                        ${photo ? `<span class="text-[10px] text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Photo Jointe</span>` : ''}
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                };
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                            <div>
-                                <h2 class="font-bold text-white text-lg">INSPECTION CARROSSERIE EXTÉRIEURE</h2>
-                                <p class="text-xs text-slate-400">Faites le tour du véhicule et cochez chaque zone</p>
-                            </div>
-                            <div class="w-8 h-8 rounded-lg bg-red-600/20 text-red-500 flex items-center justify-center font-bold">2</div>
-                        </div>
-
-                        ${renderGroup('AVANT', 'fa-solid fa-car-side', 'avant', { parechocs: 'Pare-chocs', capot: 'Capot', phareG: 'Phare Gauche', phareD: 'Phare Droit', calandre: 'Calandre', parebrise: 'Pare-brise', aileG: 'Aile Av. G.', aileD: 'Aile Av. D.' })}
-                        ${renderGroup('CÔTÉ GAUCHE', 'fa-solid fa-arrow-left', 'coteG', { aileA: 'Aile Av.', porteA: 'Porte Av.', porteAr: 'Porte Ar.', basCaisse: 'Bas de caisse', retro: 'Rétroviseur', janteA: 'Jante Av.', pneuA: 'Pneu Av.', janteAr: 'Jante Ar.', pneuAr: 'Pneu Ar.' })}
-                        ${renderGroup('ARRIÈRE', 'fa-solid fa-car-rear', 'arriere', { parechocs: 'Pare-chocs Ar.', coffre: 'Coffre / Hayon', feuG: 'Feu Ar. Gauche', feuD: 'Feu Ar. Droit', lunette: 'Lunette Ar.', plaque: 'Plaque immat.' })}
-                        ${renderGroup('CÔTÉ DROIT', 'fa-solid fa-arrow-right', 'coteD', { aileA: 'Aile Av.', porteA: 'Porte Av.', porteAr: 'Porte Ar.', basCaisse: 'Bas de caisse', retro: 'Rétroviseur', janteA: 'Jante Av.', pneuA: 'Pneu Av.', janteAr: 'Jante Ar.', pneuAr: 'Pneu Ar.' })}
-                    </div>
-                `;
-            }
-
-            setChecklistStatus(category, group, itemKey, status) {
-                if (group) {
-                    this.currentData[category][group][itemKey] = status;
-                } else {
-                    this.currentData[category][itemKey] = status;
-                }
-                this.renderStep();
-            }
-
-            setChecklistNote(noteCategory, key, text) {
-                this.currentData[noteCategory][key] = text;
-            }
-
-            handlePhotoUpload(event, photoCategory, key) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                // Compress image dynamically using Canvas
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        const MAX_WIDTH = 1024;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                        if (photoCategory === 'photos') {
-                            this.currentData.photos.push({
-                                id: Date.now(),
-                                timestamp: new Date().toLocaleString('fr-FR'),
-                                description: key || 'Photo Véhicule',
-                                dataUrl: compressedDataUrl
-                            });
-                        } else {
-                            this.currentData[photoCategory][key] = compressedDataUrl;
-                        }
-                        this.renderStep();
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-
-            renderStep3(container) {
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-4">
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
-                            <div>
-                                <h2 class="font-bold text-white text-lg">SCHÉMA INTERACTIF DES DÉFAUTS</h2>
-                                <p class="text-xs text-slate-400">Cliquez ou touchez directement la voiture pour placer un marqueur de défaut</p>
-                            </div>
-                            <button onclick="app.clearMarkers()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold">Réinitialiser les marqueurs</button>
-                        </div>
-
-                        <!-- CAR SVG SCHEMATIC -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden">
-                            <svg id="car-svg-diagram" viewBox="0 0 800 500" class="w-full max-w-2xl h-auto select-none cursor-crosshair" onclick="app.handleSvgClick(event)">
-                                <!-- Outline Car Visuals -->
-                                <g stroke="#64748b" stroke-width="2" fill="#1e293b">
-                                    <!-- FACE -->
-                                    <rect x="50" y="40" width="160" height="100" rx="15" />
-                                    <circle cx="80" cy="65" r="12" fill="#334155" />
-                                    <circle cx="180" cy="65" r="12" fill="#334155" />
-                                    <rect x="95" y="90" width="70" height="30" rx="5" fill="#0f172a" />
-                                    <text x="130" y="25" fill="#94a3b8" text-anchor="middle" font-size="12" font-weight="bold">FACE AVANT</text>
-
-                                    <!-- ARRIÈRE -->
-                                    <rect x="50" y="220" width="160" height="100" rx="15" />
-                                    <rect x="70" y="235" width="30" height="15" rx="3" fill="#ef4444" />
-                                    <rect x="160" y="235" width="30" height="15" rx="3" fill="#ef4444" />
-                                    <rect x="95" y="270" width="70" height="20" rx="3" fill="#0f172a" />
-                                    <text x="130" y="205" fill="#94a3b8" text-anchor="middle" font-size="12" font-weight="bold">ARRIÈRE</text>
-
-                                    <!-- PROFIL GAUCHE -->
-                                    <path d="M 300 120 L 360 80 L 480 80 L 540 120 L 570 120 L 570 160 L 280 160 L 280 120 Z" />
-                                    <circle cx="340" cy="160" r="20" fill="#0f172a" stroke="#94a3b8" stroke-width="3" />
-                                    <circle cx="510" cy="160" r="20" fill="#0f172a" stroke="#94a3b8" stroke-width="3" />
-                                    <text x="425" y="55" fill="#94a3b8" text-anchor="middle" font-size="12" font-weight="bold">PROFIL GAUCHE</text>
-
-                                    <!-- PROFIL DROIT -->
-                                    <path d="M 300 300 L 360 260 L 480 260 L 540 300 L 570 300 L 570 340 L 280 340 L 280 300 Z" />
-                                    <circle cx="340" cy="340" r="20" fill="#0f172a" stroke="#94a3b8" stroke-width="3" />
-                                    <circle cx="510" cy="340" r="20" fill="#0f172a" stroke="#94a3b8" stroke-width="3" />
-                                    <text x="425" y="235" fill="#94a3b8" text-anchor="middle" font-size="12" font-weight="bold">PROFIL DROIT</text>
-
-                                    <!-- DESSUS / TOIT -->
-                                    <rect x="630" y="100" width="120" height="220" rx="30" />
-                                    <rect x="650" y="140" width="80" height="140" rx="10" fill="#0f172a" />
-                                    <text x="690" y="80" fill="#94a3b8" text-anchor="middle" font-size="12" font-weight="bold">VUE DU DESSUS</text>
-                                </g>
-
-                                <!-- Markers placement -->
-                                <g id="svg-markers-group">
-                                    ${this.currentData.schemaMarkers.map((m, idx) => `
-                                        <circle cx="${m.x}" cy="${m.y}" r="12" fill="#ef4444" stroke="#ffffff" stroke-width="2" />
-                                        <text x="${m.x}" y="${m.y + 4}" fill="#ffffff" text-anchor="middle" font-size="10" font-weight="bold">${idx + 1}</text>
-                                    `).join('')}
-                                </g>
-                            </svg>
-                        </div>
-
-                        <!-- Markers Legend -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase">Légende des impacts positionnés (${this.currentData.schemaMarkers.length})</h3>
-                            <div class="flex flex-wrap gap-2">
-                                ${this.currentData.schemaMarkers.map((m, idx) => `
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-950/80 border border-red-800 text-red-300 rounded-lg text-xs font-bold">
-                                        Impact N°${idx + 1}
-                                        <button onclick="app.removeMarker(${idx})" class="text-slate-400 hover:text-white ml-1">&times;</button>
-                                    </span>
-                                `).join('') || '<p class="text-xs text-slate-500 italic">Aucun impact visuel pointé sur le schéma.</p>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            handleSvgClick(event) {
-                const svg = document.getElementById('car-svg-diagram');
-                const rect = svg.getBoundingClientRect();
-                const x = ((event.clientX - rect.left) / rect.width) * 800;
-                const y = ((event.clientY - rect.top) / rect.height) * 500;
-
-                this.currentData.schemaMarkers.push({ x: Math.round(x), y: Math.round(y) });
-                this.renderStep();
-            }
-
-            removeMarker(idx) {
-                this.currentData.schemaMarkers.splice(idx, 1);
-                this.renderStep();
-            }
-
-            clearMarkers() {
-                this.currentData.schemaMarkers = [];
-                this.renderStep();
-            }
-
-            renderGenericChecklistStep(container, title, stepNum, dataCategory, noteCategory, items) {
-                const data = this.currentData[dataCategory];
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                            <div>
-                                <h2 class="font-bold text-white text-lg">${title}</h2>
-                                <p class="text-xs text-slate-400">Contrôle visuel et fonctionnel avec le client</p>
-                            </div>
-                            <div class="w-8 h-8 rounded-lg bg-red-600/20 text-red-500 flex items-center justify-center font-bold">${stepNum}</div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            ${Object.keys(items).map(itemKey => {
-                                const label = items[itemKey];
-                                const currentStatus = data[itemKey] || 'BON';
-                                const currentNote = this.currentData[noteCategory] ? (this.currentData[noteCategory][itemKey] || '') : '';
-
-                                return `
-                                    <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm font-semibold text-slate-200">${label}</span>
-                                            <div class="flex items-center gap-1">
-                                                <button onclick="app.setChecklistStatus('${dataCategory}', null, '${itemKey}', 'BON')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'BON' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}">🟢 BON</button>
-                                                <button onclick="app.setChecklistStatus('${dataCategory}', null, '${itemKey}', 'DEFAUT')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'DEFAUT' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400'}">🟠 DÉFAUT</button>
-                                                <button onclick="app.setChecklistStatus('${dataCategory}', null, '${itemKey}', 'ANOMALIE')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'ANOMALIE' ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400'}">🔴 H.S / HS</button>
-                                            </div>
-                                        </div>
-                                        ${currentStatus !== 'BON' ? `
-                                            <input type="text" placeholder="Commentaires / Observations..." value="${currentNote}" onchange="app.setChecklistNote('${noteCategory}', '${itemKey}', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none">
-                                        ` : ''}
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep4(container) {
-                this.renderGenericChecklistStep(container, 'COMPARTIMENT MOTEUR', 4, 'engine', 'engineNotes', {
-                    etatGeneral: 'État général moteur', fuites: 'Fuites visibles', huiles: 'Niveau d\'huile',
-                    liquideRefroidissement: 'Liquide de refroidissement', liquideFrein: 'Liquide de frein',
-                    laveGlace: 'Liquide lave-glace', batterie: 'Batterie & cosses', courroie: 'Courroies visibles',
-                    durites: 'État des durites', connecteurs: 'Connecteurs visibles', bruitsAnormaux: 'Bruits moteurs anormaux',
-                    fumeeAnormale: 'Fumées d\'échappement'
-                });
-            }
-
-            renderStep5(container) {
-                this.renderGenericChecklistStep(container, 'CONTRÔLE MÉCANIQUE ET FONCTIONNEL', 5, 'mechanics', 'mechanicsNotes', {
-                    demarrage: 'Démarrage moteur', ralenti: 'Stabilité du ralenti', acceleration: 'Accélération',
-                    freinage: 'Système de freinage', direction: 'Direction assistée', embrayage: 'Embrayage',
-                    boite: 'Passage des vitesses', marcheArriere: 'Marche arrière', freinMain: 'Frein à main / électrique',
-                    suspension: 'Suspensions', pneus: 'État des pneumatiques', eclairage: 'Éclairage / Phares',
-                    clignotants: 'Clignotants & Warning', essuieGlaces: 'Essuie-glaces', laveGlace: 'Lave-glace',
-                    klaxon: 'Avertisseur sonore', chauffage: 'Chauffage', clim: 'Climatisation',
-                    autoradio: 'Autoradio / Écran', vitresElec: 'Vitres électriques', fermCentralisee: 'Fermeture centralisée',
-                    retrosElec: 'Rétroviseurs électriques', aideStationnement: 'Aide au stationnement / Caméra', voyantsTDB: 'Voyants tableau de bord'
-                });
-            }
-
-            renderStep6(container) {
-                this.renderGenericChecklistStep(container, 'HABITACLE & ÉQUIPEMENTS INTÉRIEURS', 6, 'interior', 'interiorNotes', {
-                    siegeConducteur: 'Siège conducteur', siegePassager: 'Siège passager', banquetteAr: 'Banquette arrière',
-                    tableauBord: 'Tableau de bord', volant: 'Volant', pommeau: 'Levier de vitesses / Pommeau',
-                    garnituresPortes: 'Garnitures de portes', moquette: 'Moquette / Tapis', cielToit: 'Ciel de toit',
-                    coffre: 'État du coffre', roueSecours: 'Roue de secours / Kit', equipementsSecurite: 'Gilet / Triangle',
-                    ceintures: 'Ceintures de sécurité', airbags: 'Airbags / Voyants', isofix: 'Fixations ISOFIX'
-                });
-            }
-
-            renderStep7(container) {
-                const ub = this.currentData.underbody;
-                const items = {
-                    carter: 'Carter moteur', boite: 'Boîte de vitesses', echappement: 'Ligne d\'échappement',
-                    protections: 'Protections sous moteur', trainAvant: 'Train avant & rotules', trainArriere: 'Train arrière',
-                    freins: 'Canalisations de freins', durites: 'Durites flexibles', suspensions: 'Amortisseurs / Ressorts',
-                    caisse: 'Soubassement & Caisse', corrosion: 'Traces de corrosion', chocs: 'Traces de chocs sous caisse'
-                };
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-gradient-to-r from-red-950/80 to-slate-900 border border-red-800/60 p-5 rounded-2xl shadow-xl space-y-2">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="text-xs font-bold uppercase tracking-wider text-red-400">Section Prioritaire Elsass Turbo Auto</span>
-                                    <h2 class="text-xl font-black text-white">INSPECTION VISUELLE DU DESSOUS DU VÉHICULE</h2>
-                                </div>
-                                <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold">7</div>
-                            </div>
-                            <div class="flex items-center gap-2 text-slate-200 text-xs font-medium pt-2">
-                                <input type="checkbox" id="ub-check" ${ub.visualWithClient ? 'checked' : ''} onchange="app.currentData.underbody.visualWithClient = this.checked" class="w-4 h-4 rounded text-red-600 focus:ring-0 bg-slate-800 border-slate-700">
-                                <label for="ub-check"> Inspection du dessous du véhicule effectuée en présence du client sur pont / fosse / visuel</label>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            ${Object.keys(items).map(itemKey => {
-                                const currentStatus = ub[itemKey] || 'BON';
-                                const currentNote = this.currentData.underbodyNotes[itemKey] || '';
-                                return `
-                                    <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm font-semibold text-slate-200">${items[itemKey]}</span>
-                                            <div class="flex items-center gap-1">
-                                                <button onclick="app.setChecklistStatus('underbody', null, '${itemKey}', 'BON')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'BON' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}">🟢 RAS</button>
-                                                <button onclick="app.setChecklistStatus('underbody', null, '${itemKey}', 'DEFAUT')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'DEFAUT' ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-400'}">🟠 DÉFAUT</button>
-                                                <button onclick="app.setChecklistStatus('underbody', null, '${itemKey}', 'ENDOMMAGE')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${currentStatus === 'ENDOMMAGE' ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400'}">🔴 ABÎMÉ</button>
-                                            </div>
-                                        </div>
-                                        ${currentStatus !== 'BON' ? `
-                                            <input type="text" placeholder="Préciser la remarque..." value="${currentNote}" onchange="app.setChecklistNote('underbodyNotes', '${itemKey}', this.value)" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white outline-none">
-                                        ` : ''}
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep8(container) {
-                const rt = this.currentData.roadTest;
-                const diag = this.currentData.diagnostic;
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                            <h2 class="font-bold text-lg text-white border-b border-slate-800 pb-2">ESSAI ROUTIER & DIAGNOSTIC</h2>
-                            
-                            <!-- Road test checkboxes -->
-                            <div class="space-y-3">
-                                <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider">ESSAI DU VÉHICULE</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-300">
-                                    ${[
-                                        ['done', 'Essai routier effectué avec le client'],
-                                        ['coldStart', 'Démarrage à froid contrôlé'],
-                                        ['braking', 'Freinage contrôlé'],
-                                        ['steering', 'Direction tenue de cap contrôlée'],
-                                        ['gearbox', 'Boîte de vitesses contrôlée'],
-                                        ['clutch', 'Embrayage contrôlé'],
-                                        ['acceleration', 'Accélération contrôlée'],
-                                        ['handling', 'Comportement routier global validé']
-                                    ].map(([k, label]) => `
-                                        <label class="flex items-center space-x-2 bg-slate-800 p-2.5 rounded-xl cursor-pointer">
-                                            <input type="checkbox" ${rt[k] ? 'checked' : ''} onchange="app.currentData.roadTest['${k}'] = this.checked" class="w-4 h-4 text-red-600 rounded">
-                                            <span>${label}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Observations pendant l'essai</label>
-                                    <textarea data-bind="roadTest.notes" placeholder="Remarques éventuelles durant la conduite..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-sm outline-none h-20">${rt.notes}</textarea>
-                                </div>
-                            </div>
-
-                            <!-- Diagnostic lights -->
-                            <div class="space-y-3 pt-4 border-t border-slate-800">
-                                <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider">VOYANTS ET DIAGNOSTIC</h3>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                                    ${[
-                                        ['noAnomalies', 'Aucun voyant anormal'],
-                                        ['engineLight', 'Voyant Moteur'],
-                                        ['abs', 'Voyant ABS'],
-                                        ['airbag', 'Voyant Airbag'],
-                                        ['esp', 'Voyant ESP'],
-                                        ['battery', 'Voyant Batterie'],
-                                        ['oilPressure', 'Voyant Pression Huile'],
-                                        ['temp', 'Voyant Température']
-                                    ].map(([k, label]) => `
-                                        <label class="flex items-center space-x-2 bg-slate-800 p-2.5 rounded-xl cursor-pointer text-slate-200">
-                                            <input type="checkbox" ${diag[k] ? 'checked' : ''} onchange="app.currentData.diagnostic['${k}'] = this.checked" class="w-4 h-4 text-red-600 rounded">
-                                            <span>${label}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Codes défaut éventuellement relevés</label>
-                                        <input type="text" data-bind="diagnostic.faultCodes" value="${diag.faultCodes}" placeholder="ex: P0300, P0171" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-400 mb-1">Observations Diagnostic</label>
-                                        <input type="text" data-bind="diagnostic.notes" value="${diag.notes}" placeholder="Note explicative..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep9(container) {
-                const work = this.currentData.workDone;
-                const reserves = this.currentData.clientReserves;
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <!-- Work Done Section -->
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                            <h2 class="font-bold text-lg text-white">TRAVAUX RÉALISÉS PAR ELSASS TURBO AUTO</h2>
-                            <p class="text-xs text-slate-400">Saisissez les réparations / entretiens récents effectués avant la vente</p>
-                            
-                            <div class="space-y-2">
-                                ${work.map((w, idx) => `
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-slate-500 font-bold text-xs">${idx + 1}.</span>
-                                        <input type="text" value="${w}" onchange="app.updateWorkDone(${idx}, this.value)" placeholder="ex: Vidange moteur + filtre à huile + bougies" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none">
-                                    </div>
-                                me`).join('')}
-                            </div>
-                            <button onclick="app.addWorkDoneLine()" class="text-xs font-bold text-red-400 hover:underline flex items-center gap-1">+ Ajouter une ligne de travaux</button>
-                        </div>
-
-                        <!-- Client Reserves Section -->
-                        <div class="bg-amber-950/30 border border-amber-800/60 p-5 rounded-2xl space-y-4">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h2 class="font-bold text-lg text-amber-300">DÉFAUTS ET RÉSERVES NOTIFIÉS AU CLIENT</h2>
-                                    <p class="text-xs text-slate-400">Notification écrite expresse des défauts présentés au client avant signature</p>
-                                </div>
-                                <button onclick="app.addReserveModal()" class="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition shadow">+ Ajouter un défaut</button>
-                            </div>
-
-                            <div class="space-y-2">
-                                ${reserves.map((r, idx) => `
-                                    <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
-                                        <div>
-                                            <span class="font-bold text-amber-400">[${r.location}]</span>
-                                            <span class="text-white ml-2">${r.description}</span>
-                                        </div>
-                                        <button onclick="app.removeReserve(${idx})" class="text-red-400 hover:text-red-300 font-bold"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                `).join('') || `<p class="text-xs text-slate-500 italic">Aucune réserve explicite ajoutée.</p>`}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            updateWorkDone(idx, val) {
-                this.currentData.workDone[idx] = val;
-            }
-
-            addWorkDoneLine() {
-                this.currentData.workDone.push('');
-                this.renderStep();
-            }
-
-            addReserveModal() {
-                const desc = prompt("Description du défaut constaté :");
-                const loc = prompt("Localisation (ex: Pare-chocs arrière, Siège conducteur) :");
-                if (desc) {
-                    this.currentData.clientReserves.push({ id: Date.now(), description: desc, location: loc || 'Général' });
-                    this.renderStep();
-                }
-            }
-
-            removeReserve(idx) {
-                this.currentData.clientReserves.splice(idx, 1);
-                this.renderStep();
-            }
-
-            renderStep10(container) {
-                const acc = this.currentData.accessories;
-                const items = [
-                    ['cle1', '1ère Clé'], ['cle2', '2ème Clé'], ['carte', 'Carte / Télécommande'],
-                    ['carnet', 'Carnet d\'entretien'], ['factures', 'Dossier de factures'], ['notice', 'Notice d\'utilisation'],
-                    ['roueSecours', 'Roue de secours'], ['kitAnticrevaison', 'Kit anti-crevaison'], ['triangle', 'Triangle de signalisation'],
-                    ['gilet', 'Gilet haute visibilité']
-                ];
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                            <h2 class="font-bold text-lg text-white">ÉLÉMENTS ET ACCESSOIRES REMIS AVEC LE VÉHICULE</h2>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                ${items.map(([k, label]) => `
-                                    <label class="flex items-center space-x-3 bg-slate-800 p-3 rounded-xl cursor-pointer text-sm text-slate-200">
-                                        <input type="checkbox" ${acc[k] ? 'checked' : ''} onchange="app.currentData.accessories['${k}'] = this.checked" class="w-5 h-5 text-red-600 rounded">
-                                        <span>${label}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">Autres éléments remis</label>
-                                <input type="text" data-bind="accessories.other" value="${acc.other}" placeholder="ex: Écrou antivol, tapis de sol neufs..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm">
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep11(container) {
-                const photos = this.currentData.photos;
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h2 class="font-bold text-lg text-white">GALERIE PHOTOS DU VÉHICULE (${photos.length})</h2>
-                                    <p class="text-xs text-slate-400">Prenez en photo le véhicule avant remise des clés (angles, défauts, habitacle)</p>
-                                </div>
-                                <label class="cursor-pointer bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg transition">
-                                    <i class="fa-solid fa-camera text-base"></i> PRENDRE PHOTO
-                                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="app.handlePhotoUpload(event, 'photos', 'Photo Véhicule')">
-                                </label>
-                            </div>
-
-                            <!-- Photos Grid -->
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                ${photos.map((p, idx) => `
-                                    <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden relative group">
-                                        <img src="${p.dataUrl}" class="w-full h-32 object-cover">
-                                        <div class="p-2 bg-slate-900/90 text-[10px] space-y-1">
-                                            <p class="font-bold text-white truncate">Photo #${idx + 1}</p>
-                                            <p class="text-slate-400">${p.timestamp}</p>
-                                        </div>
-                                        <button onclick="app.deletePhoto(${idx})" class="absolute top-2 right-2 w-7 h-7 bg-red-600 text-white rounded-full flex items-center justify-center text-xs shadow hover:bg-red-700">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </div>
-                                `).join('') || `<div class="col-span-full text-center py-10 text-slate-500 text-xs">Aucune photo générale enregistrée dans la galerie.</div>`}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            deletePhoto(idx) {
-                this.currentData.photos.splice(idx, 1);
-                this.renderStep();
-            }
-
-            renderStep12(container) {
-                const d = this.currentData;
-
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                                <div>
-                                    <h2 class="font-bold text-xl text-white">RÉCAPITULATIF DE LA FICHE D'INSPECTION</h2>
-                                    <p class="text-xs text-slate-400">Revue complète avant apposition des signatures tactiles</p>
-                                </div>
-                                <span class="font-mono text-red-400 font-bold bg-red-950 px-3 py-1 rounded-lg border border-red-800">${d.dossierNum}</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <div class="bg-slate-800 p-3 rounded-xl">
-                                    <h3 class="font-bold text-red-400 uppercase mb-1">CLIENT</h3>
-                                    <p class="font-bold text-white text-sm">${d.client.nom.toUpperCase()} ${d.client.prenom}</p>
-                                    <p class="text-slate-300">${d.client.telephone || 'Non renseigné'}</p>
-                                    <p class="text-slate-400">${d.client.adresse}</p>
-                                </div>
-                                <div class="bg-slate-800 p-3 rounded-xl">
-                                    <h3 class="font-bold text-red-400 uppercase mb-1">VÉHICULE</h3>
-                                    <p class="font-bold text-white text-sm">${d.vehicle.marque} ${d.vehicle.modele} ${d.vehicle.version}</p>
-                                    <p class="text-slate-200 font-mono font-bold">Immat: ${d.vehicle.immat}</p>
-                                    <p class="text-slate-400">Kilométrage : ${d.vehicle.km} km</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-red-950/40 border border-red-900/50 p-4 rounded-xl flex items-center justify-between text-xs">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl"></i>
-                                    <div>
-                                        <p class="font-bold text-white">RÉSUMÉ DES RÉSERVES ET PHOTOS</p>
-                                        <p class="text-slate-300">Défauts signalés : <span class="font-bold text-amber-400">${d.clientReserves.length}</span> | Photos jointes : <span class="font-bold text-white">${d.photos.length}</span></p>
-                                    </div>
-                                </div>
-                                <button onclick="app.currentStep = 2; app.renderStep();" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 font-semibold hover:bg-slate-700">Modifier</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            renderStep13(container) {
-                container.innerHTML = `
-                    <div class="max-w-4xl mx-auto space-y-5">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                            <h2 class="font-bold text-xl text-white">SIGNATURE ÉLECTRONIQUE CONTRADICTOIRE</h2>
-                            <p class="text-xs text-slate-400">Signez directement sur l'écran tactile avec le doigt ou un stylet</p>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Client Signature -->
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <label class="text-xs font-bold text-slate-300 uppercase">SIGNATURE CLIENT</label>
-                                        <button onclick="app.clearCanvas('canvas-client')" class="text-[10px] text-red-400 hover:underline">Effacer</button>
-                                    </div>
-                                    <canvas id="canvas-client" width="350" height="180" class="signature-canvas w-full rounded-xl"></canvas>
-                                </div>
-
-                                <!-- Vendor Signature -->
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-center">
-                                        <label class="text-xs font-bold text-slate-300 uppercase">SIGNATURE ELSASS TURBO AUTO</label>
-                                        <button onclick="app.clearCanvas('canvas-vendor')" class="text-[10px] text-red-400 hover:underline">Effacer</button>
-                                    </div>
-                                    <canvas id="canvas-vendor" width="350" height="180" class="signature-canvas w-full rounded-xl"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                setTimeout(() => {
-                    this.initCanvas('canvas-client', 'client');
-                    this.initCanvas('canvas-vendor', 'vendor');
-                }, 100);
-            }
-
-            initCanvas(id, type) {
-                const canvas = document.getElementById(id);
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                ctx.lineWidth = 2.5;
-                ctx.strokeStyle = '#0f172a';
-
-                // Restore signature if exists
-                if (this.currentData.signatures[type]) {
-                    const img = new Image();
-                    img.onload = () => ctx.drawImage(img, 0, 0);
-                    img.src = this.currentData.signatures[type];
-                }
-
-                let drawing = false;
-
-                const getPos = (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                    return { x: clientX - rect.left, y: clientY - rect.top };
-                };
-
-                const startDraw = (e) => {
-                    drawing = true;
-                    const pos = getPos(e);
-                    ctx.beginPath();
-                    ctx.moveTo(pos.x, pos.y);
-                };
-
-                const draw = (e) => {
-                    if (!drawing) return;
-                    e.preventDefault();
-                    const pos = getPos(e);
-                    ctx.lineTo(pos.x, pos.y);
-                    ctx.stroke();
-                };
-
-                const stopDraw = () => {
-                    if (drawing) {
-                        drawing = false;
-                        this.currentData.signatures[type] = canvas.toDataURL();
-                        this.currentData.signatures.date = new Date().toLocaleString('fr-FR');
-                    }
-                };
-
-                canvas.addEventListener('mousedown', startDraw);
-                canvas.addEventListener('mousemove', draw);
-                canvas.addEventListener('mouseup', stopDraw);
-
-                canvas.addEventListener('touchstart', startDraw, { passive: false });
-                canvas.addEventListener('touchmove', draw, { passive: false });
-                canvas.addEventListener('touchend', stopDraw);
-            }
-
-            clearCanvas(id) {
-                const canvas = document.getElementById(id);
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const type = id.includes('client') ? 'client' : 'vendor';
-                this.currentData.signatures[type] = null;
-            }
-
-            renderStep14(container) {
-                this.currentData.status = 'Terminé';
-                this.saveCurrentState();
-
-                container.innerHTML = `
-                    <div class="max-w-3xl mx-auto space-y-6 text-center py-6">
-                        <div class="w-20 h-20 bg-emerald-950 border border-emerald-800 text-emerald-400 rounded-full flex items-center justify-center text-3xl mx-auto shadow-2xl">
-                            <i class="fa-solid fa-check"></i>
-                        </div>
-                        <h2 class="text-2xl font-extrabold text-white">FICHE VALIDÉE AVEC SUCCÈS !</h2>
-                        <p class="text-slate-300 text-sm max-w-lg mx-auto">
-                            Le document contradictoire d'état du véhicule pour le dossier <span class="font-mono text-red-400 font-bold">${this.currentData.dossierNum}</span> est prêt à être imprimé ou enregistré au format PDF.
-                        </p>
-
-                        <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-                            <button onclick="app.printCurrentFiche()" class="px-6 py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-xl shadow-red-900/40">
-                                <i class="fa-solid fa-print text-xl"></i> IMPRIMER / ENREGISTRER PDF
-                            </button>
-                            <button onclick="app.showHome()" class="px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base">
-                                REVENIR À L'ACCUEIL
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            printCurrentFiche() {
-                this.printFiche(this.currentData.id);
-            }
-
-            printFiche(id) {
-                const fiche = this.fiches.find(f => f.id === id) || this.currentData;
-                const printZone = document.getElementById('print-zone');
-
-                printZone.innerHTML = `
-                    <div class="p-4 space-y-4 text-slate-900 font-sans text-xs">
-                        <!-- HEADER -->
-                        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3">
-                            <div>
-                                <h1 class="text-2xl font-black text-red-600 uppercase tracking-wide">ELSASS TURBO AUTO</h1>
-                                <p class="text-[10px] font-bold text-slate-600 uppercase">Négociant Automobile • Véhicules d'Occasion & Sportifs</p>
-                                <p class="text-[9px] text-slate-500">${this.settings.address} • Tél : ${this.settings.phone}</p>
-                            </div>
-                            <div class="text-right">
-                                <h2 class="text-base font-bold uppercase">État du Véhicule Avant Livraison</h2>
-                                <p class="font-mono text-sm font-bold text-red-600">${fiche.dossierNum}</p>
-                                <p class="text-[10px] text-slate-500">Date : ${new Date(fiche.createdAt).toLocaleDateString('fr-FR')}</p>
-                            </div>
-                        </div>
-
-                        <!-- CLIENT & VEHICLE SUMMARY -->
-                        <div class="grid grid-cols-2 gap-4 border border-slate-300 p-3 rounded-lg">
-                            <div>
-                                <h3 class="font-bold text-red-600 uppercase text-[10px] border-b pb-1 mb-1">CLIENT</h3>
-                                <p class="font-bold text-sm">${fiche.client.nom.toUpperCase()} ${fiche.client.prenom}</p>
-                                <p>${fiche.client.adresse || 'Adresse non renseignée'}</p>
-                                <p>Tél : ${fiche.client.telephone || '-'}</p>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-red-600 uppercase text-[10px] border-b pb-1 mb-1">VÉHICULE</h3>
-                                <p class="font-bold text-sm">${fiche.vehicle.marque} ${fiche.vehicle.modele} ${fiche.vehicle.version}</p>
-                                <p>Immat : <span class="font-mono font-bold">${fiche.vehicle.immat}</span> | VIN : <span class="font-mono">${fiche.vehicle.vin}</span></p>
-                                <p>Kilométrage : <span class="font-bold">${fiche.vehicle.km} km</span> | Énergie : ${fiche.vehicle.carburant}</p>
-                            </div>
-                        </div>
-
-                        <!-- RESERVES / WORK DONE -->
-                        <div class="border border-slate-300 p-3 rounded-lg space-y-2">
-                            <h3 class="font-bold text-red-600 uppercase text-[10px] border-b pb-1">DÉFAUTS ET RÉSERVES SIGNALÉS AU CLIENT</h3>
-                            ${fiche.clientReserves.map(r => `<p class="text-xs"><strong>[${r.location}]</strong> ${r.description}</p>`).join('') || '<p class="italic text-slate-500 text-[10px]">Aucune réserve spécifique.</p>'}
-                        </div>
-
-                        <!-- LEGAL MENTION -->
-                        <div class="bg-slate-100 border border-slate-300 p-3 rounded-lg text-[9px] leading-relaxed text-slate-700">
-                            <strong>MENTION LÉGALE DE LIVRAISON :</strong> Le véhicule a été présenté au client avant livraison. Un tour complet du véhicule ainsi qu'une présentation des éléments contrôlés ont été effectués contradictoirement avec le client. Les défauts apparents, réserves et observations mentionnés dans le présent document ont été portés à sa connaissance avant la livraison effective. Le présent document constitue un constat de l'état apparent au moment de la remise du véhicule.
-                        </div>
-
-                        <!-- SIGNATURES -->
-                        <div class="grid grid-cols-2 gap-6 pt-4 border-t">
-                            <div class="border p-2 rounded text-center h-28 flex flex-col justify-between">
-                                <p class="font-bold text-[10px]">SIGNATURE DU CLIENT</p>
-                                ${fiche.signatures.client ? `<img src="${fiche.signatures.client}" class="max-h-16 mx-auto">` : '<p class="text-[10px] italic text-slate-400">Non signée</p>'}
-                                <p class="text-[8px] text-slate-400">Lu et approuvé</p>
-                            </div>
-                            <div class="border p-2 rounded text-center h-28 flex flex-col justify-between">
-                                <p class="font-bold text-[10px]">ELSASS TURBO AUTO</p>
-                                ${fiche.signatures.vendor ? `<img src="${fiche.signatures.vendor}" class="max-h-16 mx-auto">` : '<p class="text-[10px] italic text-slate-400">Non signée</p>'}
-                                <p class="text-[8px] text-slate-400">Cachet / Date</p>
-                            </div>
-                        </div>
-
-                        <!-- FOOTER PAGE NUM -->
-                        <div class="text-center text-[9px] text-slate-400 pt-2 border-t">
-                            Elsass Turbo Auto — État du véhicule avant livraison — Dossier ${fiche.dossierNum}
-                        </div>
-                    </div>
-                `;
-
-                printZone.classList.remove('hidden');
-                window.print();
-                setTimeout(() => printZone.classList.add('hidden'), 1000);
-            }
-
-            showSettings() {
-                alert(`ELSASS TURBO AUTO - Version 1.0 PWA\nApplication installée localement sur votre tablette.`);
-            }
-
-            closeModal() {
-                document.getElementById('app-modal').classList.add('hidden');
-            }
-        }
-
-        // Initialize App on DOM load
-        let app;
-        window.addEventListener('DOMContentLoaded', () => {
-            app = new ElsassTurboApp();
-        });
-    </script>
+    <!-- INSPECTION CARROSSERIE & ESSENTIELS -->
+    <div class="card">
+      <h2>2. Contrôle Visuel Extérieur & Dessous</h2>
+      
+      <label>État Carrosserie Extérieure</label>
+      <div class="status-group">
+        <button type="button" class="btn-status bon active" onclick="setStatus(this)">🟢 Bon État</button>
+        <button type="button" class="btn-status defaut" onclick="setStatus(this)">🟠 Défaut</button>
+        <button type="button" class="btn-status endommage" onclick="setStatus(this)">🔴 Endommagé</button>
+      </div>
+      <textarea placeholder="Observations carrosserie (rayures, enfoncements...)"></textarea>
+
+      <label style="margin-top: 15px;">Inspection Dessous de Véhicule & Organes</label>
+      <div class="status-group">
+        <button type="button" class="btn-status bon active" onclick="setStatus(this)">🟢 RAS</button>
+        <button type="button" class="btn-status defaut" onclick="setStatus(this)">🟠 À surveiller</button>
+        <button type="button" class="btn-status endommage" onclick="setStatus(this)">🔴 Anormal</button>
+      </div>
+      <textarea placeholder="Observations sous caisse, fuites, corrosion..."></textarea>
+    </div>
+
+    <!-- ESSAI ET TRAVAUX -->
+    <div class="card">
+      <h2>3. Essai Routier & Réservez</h2>
+      <div class="check-grid">
+        <label class="check-item"><input type="checkbox" checked> Essai routier effectué</label>
+        <label class="check-item"><input type="checkbox" checked> Freinage contrôlé</label>
+        <label class="check-item"><input type="checkbox" checked> Aucun voyant critique</label>
+        <label class="check-item"><input type="checkbox" checked> Éclairage conforme</label>
+      </div>
+      <div style="margin-top: 15px;">
+        <label>Défauts & Réserves signalés au client</label>
+        <textarea id="reserves" placeholder="Précisez les réserves éventuelles communiquées au client..."></textarea>
+      </div>
+    </div>
+
+    <!-- MENTIONS LÉGALES & SIGNATURES -->
+    <div class="card">
+      <h2>4. Validation & Signatures</h2>
+      <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 15px; line-height: 1.3;">
+        Le véhicule a été présenté au client avant livraison. Un tour complet du véhicule ainsi qu'une présentation des éléments contrôlés ont été effectués avec le client. Les défauts apparents, réserves et observations mentionnés dans le présent document ont été portés à sa connaissance avant la livraison.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <label>Signature Client</label>
+          <canvas id="sig-client" class="signature-pad"></canvas>
+          <button type="button" class="btn btn-secondary no-print" style="padding: 5px; font-size: 0.7rem; margin-top: 5px;" onclick="clearCanvas('sig-client')">Effacer</button>
+        </div>
+        <div>
+          <label>Signature ELSASS TURBO AUTO</label>
+          <canvas id="sig-pro" class="signature-pad"></canvas>
+          <button type="button" class="btn btn-secondary no-print" style="padding: 5px; font-size: 0.7rem; margin-top: 5px;" onclick="clearCanvas('sig-pro')">Effacer</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Gestion des boutons de statut
+    function setStatus(btn) {
+      const group = btn.parentElement;
+      group.querySelectorAll('.btn-status').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Gestion de la signature tactile sur Canvas
+    function initCanvas(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+
+      // Adapter la résolution du canvas
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
+      function startDraw(e) { drawing = true; draw(e); }
+      function stopDraw() { drawing = false; ctx.beginPath(); }
+      function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000000';
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mousemove', draw);
+
+      canvas.addEventListener('touchstart', startDraw);
+      canvas.addEventListener('touchend', stopDraw);
+      canvas.addEventListener('touchmove', draw);
+    }
+
+    function clearCanvas(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function resetForm() {
+      if (confirm("Voulez-vous réinitialiser toute la fiche ?")) {
+        location.reload();
+      }
+    }
+
+    window.onload = function() {
+      initCanvas('sig-client');
+      initCanvas('sig-pro');
+    };
+  </script>
 </body>
 </html>
-```
-
-### Comment installer et utiliser l'application sur votre tablette Android :
-
-1. **Installation simplifiée :**
-   - Transférez ou copiez le fichier `index.html` ci-dessus sur votre tablette (ou hébergez-le sur un micro-serveur Web / GitHub Pages gratuit).
-   - Ouvrez Google Chrome sur votre tablette Android et accédez à la page.
-   - Appuyez sur le menu de Chrome (3 petits points en haut à droite) puis sélectionnez **"Ajouter à l'écran d'accueil"** ou **"Installer l'application"**.
-
-2. **Utilisation Hors-ligne :**
-   - Une fois ajoutée sur l'écran d'accueil, l'application fonctionne à 100% hors connexion.
-   - Les données et images sont directement sauvegardées dans le stockage interne de votre tablette Android.
-
-3. **Impression et Export PDF direct :**
-   - Lorsque vous cliquez sur **"Imprimer / Enregistrer PDF"**, la tablette ouvre automatiquement la boîte de dialogue d'impression Android native pour imprimer en direct ou sauvegarder un document PDF A4.
