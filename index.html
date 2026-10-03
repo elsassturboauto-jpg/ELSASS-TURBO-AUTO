@@ -21,20 +21,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text); padding-bottom: 40px; }
 
-    /* HEADER APP */
-    header { background: #000; padding: 15px; text-align: center; border-bottom: 3px solid var(--primary); sticky: top; z-index: 100; }
+    header { background: #000; padding: 15px; text-align: center; border-bottom: 3px solid var(--primary); }
     header h1 { color: var(--primary); font-size: 1.6rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 900; }
-    header p { color: var(--text-sub); font-size: 0.85rem; font-weight: 500; }
+    header p { color: var(--text-sub); font-size: 0.85rem; }
 
-    /* CONTAINER & CARDS */
     .container { max-width: 950px; margin: 0 auto; padding: 15px; }
     .card { background: var(--card-bg); border-radius: 10px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     .card.highlight { border: 2px solid var(--primary); }
 
-    h2 { color: var(--text); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+    h2 { color: var(--text); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; text-transform: uppercase; }
     h3 { color: var(--primary); font-size: 1rem; margin: 15px 0 10px 0; text-transform: uppercase; }
 
-    /* FORM ELEMENTS */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -45,15 +42,12 @@
     input:focus, select:focus, textarea:focus { border-color: var(--primary); }
     textarea { resize: vertical; min-height: 90px; }
 
-    /* BUTTONS */
-    .btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center; text-transform: uppercase; margin-top: 10px; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn:active { background: var(--primary-hover); transform: scale(0.99); }
+    .btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center; text-transform: uppercase; margin-top: 10px; }
+    .btn:active { background: var(--primary-hover); }
     .btn-secondary { background: #333; color: #fff; }
-    .btn-secondary:active { background: #444; }
     .btn-success { background: var(--success); }
     .btn-small { padding: 8px 12px; font-size: 0.8rem; width: auto; margin: 0; }
 
-    /* STATUS SELECTOR */
     .item-control { background: #262626; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #333; }
     .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .item-title { font-weight: 600; font-size: 0.95rem; }
@@ -67,99 +61,53 @@
     .defect-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #444; }
     .defect-details.show { display: block; }
 
-    /* CHECKBOX GRID */
     .check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-    .check-item { background: #262626; padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; cursor: pointer; border: 1px solid #333; }
-    .check-item input[type="checkbox"] { width: 22px; height: 22px; margin: 0; accent-color: var(--primary); cursor: pointer; }
+    .check-item { background: #262626; padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; border: 1px solid #333; }
+    .check-item input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); }
 
-    /* VEHICLE SCHEMA SVG */
     .schema-container { background: #262626; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
     .car-svg { width: 100%; max-width: 600px; height: auto; }
-    .car-part { fill: #444; stroke: #666; stroke-width: 2; cursor: pointer; transition: fill 0.2s; }
-    .car-part:hover { fill: #555; }
+    .car-part { fill: #444; stroke: #666; stroke-width: 2; cursor: pointer; }
     .car-part.has-defect { fill: var(--danger) !important; stroke: #fff; }
 
-    /* PHOTO GALLERY */
     .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
     .photo-card { background: #262626; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #444; }
     .photo-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
-    .photo-card .photo-info { padding: 6px; font-size: 0.75rem; color: #ccc; background: #1a1a1a; }
-    .photo-card .btn-del { position: absolute; top: 4px; right: 4px; background: rgba(211,47,47,0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; }
+    .photo-card .btn-del { position: absolute; top: 4px; right: 4px; background: rgba(211,47,47,0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
 
-    /* SIGNATURE CANVAS */
     canvas.signature-pad { width: 100%; height: 160px; background: #fff; border-radius: 8px; touch-action: none; border: 2px solid #555; }
 
-    /* NAVIGATION / TABS */
     .screen { display: none; }
     .screen.active { display: block; }
 
-    /* EN-TÊTE ET PIED DE PAGE IMPRESSION (MASQUÉS PAR DÉFAUT) */
     .print-only { display: none; }
 
-    /* ==========================================================================
-       STYLES D'IMPRESSION OPTIMISÉS POUR PDF & IMPRIMANTE (A4 MULTI-PAGES)
-       ========================================================================== */
     @media print {
       @page { size: A4 portrait; margin: 12mm 10mm 15mm 10mm; }
-
-      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; font-size: 9.5pt; line-height: 1.2; }
+      body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; font-size: 9.5pt; }
       header, .no-print, .btn, button, input[type="file"], .btn-status:not(.active) { display: none !important; }
-      
       .screen { display: block !important; }
-      #screen-home, #screen-list { display: none !important; }
-
+      #screen-home { display: none !important; }
       .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-      .card { background: #ffffff !important; color: #000000 !important; border: 1px solid #aaaaaa !important; border-radius: 4px !important; padding: 10px !important; margin-bottom: 12px !important; box-shadow: none !important; page-break-inside: avoid; }
-      
-      h2 { color: #000000 !important; border-bottom: 2px solid #000000 !important; font-size: 11pt !important; margin-bottom: 8px !important; padding-bottom: 3px !important; }
-      h3 { color: #d32f2f !important; font-size: 10pt !important; margin: 8px 0 4px 0 !important; }
-
-      input, select, textarea { background: #ffffff !important; color: #000000 !important; border: none !important; padding: 0 !important; margin: 0 !important; font-size: 9.5pt !important; font-weight: bold; }
-      textarea { min-height: auto !important; height: auto !important; }
-
+      .card { background: #ffffff !important; color: #000000 !important; border: 1px solid #aaaaaa !important; padding: 10px !important; margin-bottom: 12px !important; box-shadow: none !important; page-break-inside: avoid; }
+      h2 { color: #000 !important; border-bottom: 2px solid #000 !important; font-size: 11pt !important; }
+      input, select, textarea { background: #fff !important; color: #000 !important; border: none !important; padding: 0 !important; margin: 0 !important; font-size: 9.5pt !important; font-weight: bold; }
       .grid-2, .grid-3, .grid-4 { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; }
       .grid-2 > div { width: 48% !important; }
       .grid-3 > div { width: 31% !important; }
       .grid-4 > div { width: 23% !important; }
-
-      .item-control { background: #ffffff !important; border: 1px solid #dddddd !important; padding: 6px 8px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
-      .item-header { margin-bottom: 2px !important; }
-      .item-title { font-size: 9pt !important; color: #000 !important; }
-      
-      .status-group { display: inline-block !important; }
-      .btn-status.active { display: inline-block !important; padding: 2px 6px !important; border-radius: 3px !important; font-size: 8.5pt !important; border: 1px solid #000 !important; font-weight: bold !important; }
-      .btn-status.bon.active { background: #e8f5e9 !important; color: #2e7d32 !important; }
-      .btn-status.defaut.active { background: #fff3e0 !important; color: #ed6c02 !important; }
-      .btn-status.endommage.active { background: #ffebee !important; color: #c62828 !important; }
-
-      .check-grid { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
-      .check-item { background: #ffffff !important; border: 1px solid #ccc !important; padding: 4px 8px !important; font-size: 8.5pt !important; width: 48% !important; }
-      .check-item input { display: inline-block !important; width: 14px !important; height: 14px !important; }
-
-      .schema-container { background: #ffffff !important; border: 1px solid #ccc !important; padding: 5px !important; }
-      .car-part { fill: #eee !important; stroke: #444 !important; }
-      .car-part.has-defect { fill: #d32f2f !important; stroke: #000 !important; }
-
-      .photo-grid { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; page-break-inside: avoid; }
-      .photo-card { width: 48% !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
-      .photo-card img { height: 130px !important; object-fit: contain !important; background: #f9f9f9; }
-      .photo-card .photo-info { background: #eee !important; color: #000 !important; font-size: 8pt !important; }
-      .photo-card .btn-del { display: none !important; }
-
-      canvas.signature-pad { border: 1px solid #000000 !important; height: 100px !important; background: #fff !important; }
-
+      .item-control { background: #fff !important; border: 1px solid #ddd !important; padding: 6px !important; margin-bottom: 6px !important; page-break-inside: avoid; }
+      .btn-status.active { display: inline-block !important; padding: 2px 6px !important; border: 1px solid #000 !important; font-weight: bold !important; }
+      canvas.signature-pad { border: 1px solid #000 !important; height: 100px !important; }
       .print-only { display: block !important; }
       .print-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
-      .print-header h1 { font-size: 18pt; font-weight: 900; color: #000; letter-spacing: 1px; }
-      .print-header p { font-size: 10pt; color: #444; text-transform: uppercase; }
-
+      .print-header h1 { font-size: 18pt; font-weight: 900; color: #000; }
       .print-footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 4px; background: white; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER NAVIGATION -->
   <header class="no-print">
     <h1>ELSASS TURBO AUTO</h1>
     <p>État du véhicule avant livraison</p>
@@ -167,7 +115,6 @@
 
   <div class="container">
 
-    <!-- EN-TÊTE D'IMPRESSION PRO -->
     <div class="print-only print-header">
       <h1>ELSASS TURBO AUTO</h1>
       <p>État du Véhicule Avant Livraison — Fiche Officielle de Contrôle</p>
@@ -177,76 +124,73 @@
       </div>
     </div>
 
-    <!-- ÉCRAN D'ACCUEIL -->
+    <!-- ACCUEIL -->
     <div id="screen-home" class="screen active no-print">
       <div class="card highlight" style="text-align: center;">
         <h2 style="justify-content: center; border: none; font-size: 1.4rem;">Bienvenue sur l'application</h2>
         <p style="color: var(--text-sub); margin-bottom: 20px;">Gestion numérique des fiches d'état des véhicules avant livraison.</p>
-        <button class="btn btn-success" onclick="createNewFiche()">+ NOUVELLE FICHE</button>
+        <button class="btn btn-success" type="button" onclick="createNewFiche()">+ NOUVELLE FICHE</button>
       </div>
 
       <div class="card">
-        <h2>FICHES REGISTRÉES SUR CE MENTAT / TABLETTE</h2>
+        <h2>FICHES ENREGISTRÉES SUR CE MATÉRIEL / TABLETTE</h2>
         <div id="home-fiches-list">
           <p style="color: var(--text-sub); font-size: 0.9rem;">Aucune fiche enregistrée pour le moment.</p>
         </div>
       </div>
     </div>
 
-    <!-- ÉCRAN FORMULAIRE COMPLET DE CONTRÔLE -->
+    <!-- FORMULAIRE -->
     <div id="screen-form" class="screen">
 
-      <!-- BARRE D'ACTIONS RAPIDES -->
-      <div class="card no-print highlight" style="position: sticky; top: 10px; z-index: 90; background: #1e1e1ed0; backdrop-filter: blur(8px);">
+      <div class="card no-print highlight">
         <div class="grid-3">
-          <button class="btn btn-secondary" onclick="showHome()">← Accueil</button>
-          <button class="btn btn-secondary" onclick="saveCurrentFiche(true)">💾 Sauvegarder</button>
-          <button class="btn btn-success" onclick="prepareAndPrint()">🖨️ IMPRIMER / PDF</button>
+          <button class="btn btn-secondary" type="button" onclick="showHome()">← Accueil</button>
+          <button class="btn btn-secondary" type="button" onclick="saveCurrentFiche(true)">💾 Sauvegarder</button>
+          <button class="btn btn-success" type="button" onclick="prepareAndPrint()">🖨️ IMPRIMER / PDF</button>
         </div>
       </div>
 
-      <!-- 1. IDENTIFICATION CLIENT ET VÉHICULE -->
       <div class="card">
         <h2>1. Client & Véhicule</h2>
         <h3>IDENTITÉ CLIENT</h3>
         <div class="grid-3">
-          <div><label>Nom</label><input type="text" id="cli_nom" oninput="autoSave()"></div>
-          <div><label>Prénom</label><input type="text" id="cli_prenom" oninput="autoSave()"></div>
-          <div><label>Téléphone</label><input type="tel" id="cli_tel" oninput="autoSave()"></div>
+          <div><label>Nom</label><input type="text" id="cli_nom"></div>
+          <div><label>Prénom</label><input type="text" id="cli_prenom"></div>
+          <div><label>Téléphone</label><input type="tel" id="cli_tel"></div>
         </div>
         <div class="grid-2">
-          <div><label>Adresse</label><input type="text" id="cli_adresse" oninput="autoSave()"></div>
-          <div><label>E-mail</label><input type="email" id="cli_email" oninput="autoSave()"></div>
+          <div><label>Adresse</label><input type="text" id="cli_adresse"></div>
+          <div><label>E-mail</label><input type="email" id="cli_email"></div>
         </div>
 
         <h3>SIGNALÉTIQUE VÉHICULE</h3>
         <div class="grid-4">
-          <div><label>Marque</label><input type="text" id="veh_marque" placeholder="ex: Volkswagen" oninput="autoSave()"></div>
-          <div><label>Modèle</label><input type="text" id="veh_modele" placeholder="ex: Golf" oninput="autoSave()"></div>
-          <div><label>Version</label><input type="text" id="veh_version" placeholder="ex: VII 2.0 TDI" oninput="autoSave()"></div>
-          <div><label>Immatriculation</label><input type="text" id="veh_immat" placeholder="AA-123-BB" oninput="autoSave()"></div>
+          <div><label>Marque</label><input type="text" id="veh_marque" placeholder="ex: Volkswagen"></div>
+          <div><label>Modèle</label><input type="text" id="veh_modele" placeholder="ex: Golf"></div>
+          <div><label>Version</label><input type="text" id="veh_version" placeholder="ex: VII 2.0 TDI"></div>
+          <div><label>Immatriculation</label><input type="text" id="veh_immat" placeholder="AA-123-BB"></div>
         </div>
         <div class="grid-4">
-          <div><label>Numéro VIN</label><input type="text" id="veh_vin" oninput="autoSave()"></div>
-          <div><label>Kilométrage (km)</label><input type="number" id="veh_km" oninput="autoSave()"></div>
-          <div><label>1ère Mise en circulation</label><input type="date" id="veh_date_mc" onchange="autoSave()"></div>
-          <div><label>Date Contrôle Technique</label><input type="date" id="veh_date_ct" onchange="autoSave()"></div>
+          <div><label>Numéro VIN</label><input type="text" id="veh_vin"></div>
+          <div><label>Kilométrage (km)</label><input type="number" id="veh_km"></div>
+          <div><label>1ère Mise en circulation</label><input type="date" id="veh_date_mc"></div>
+          <div><label>Date Contrôle Technique</label><input type="date" id="veh_date_ct"></div>
         </div>
         <div class="grid-3">
-          <div><label>Nombre de clés</label><input type="number" id="veh_cles" value="2" oninput="autoSave()"></div>
+          <div><label>Nombre de clés</label><input type="number" id="veh_cles" value="2"></div>
           <div>
             <label>Carburant</label>
-            <select id="veh_carburant" onchange="autoSave()">
+            <select id="veh_carburant">
               <option>Diesel</option>
               <option>Essence</option>
               <option>Hybride</option>
               <option>Électrique</option>
-              <option>GPL</option>
             </select>
           </div>
           <div>
             <label>Boîte de vitesses</label>
-            <select id="veh_boite" onchange="autoSave()">
+            <select id="veh_boite">
               <option>Manuelle</option>
               <option>Automatique</option>
             </select>
@@ -254,85 +198,171 @@
         </div>
       </div>
 
-      <!-- 2. REPRÉSENTATION VISUELLE VÉHICULE -->
       <div class="card">
         <h2>2. Représentation Visuelle des Défauts</h2>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 10px;">Cliquez sur une zone du schéma pour signaler un défaut visuel sur la carrosserie.</p>
         <div class="schema-container">
           <svg class="car-svg" viewBox="0 0 600 300">
-            <!-- VUE AVANT -->
             <g transform="translate(20, 20)">
-              <rect id="part-avant" class="car-part" x="0" y="20" width="100" height="60" rx="10" onclick="togglePartDefect('part-avant', 'Avant / Pare-chocs')"/>
+              <rect id="part-avant" class="car-part" x="0" y="20" width="100" height="60" rx="10" onclick="togglePartDefect('part-avant')"/>
               <text x="50" y="55" fill="#fff" font-size="12" text-anchor="middle" pointer-events="none">FACE AVANT</text>
             </g>
-            <!-- VUE CÔTÉ GAUCHE -->
             <g transform="translate(140, 20)">
-              <rect id="part-cote-g" class="car-part" x="0" y="10" width="180" height="80" rx="15" onclick="togglePartDefect('part-cote-g', 'Côté Gauche')"/>
+              <rect id="part-cote-g" class="car-part" x="0" y="10" width="180" height="80" rx="15" onclick="togglePartDefect('part-cote-g')"/>
               <text x="90" y="55" fill="#fff" font-size="12" text-anchor="middle" pointer-events="none">CÔTÉ GAUCHE</text>
             </g>
-            <!-- VUE CÔTÉ DROIT -->
             <g transform="translate(140, 120)">
-              <rect id="part-cote-d" class="car-part" x="0" y="10" width="180" height="80" rx="15" onclick="togglePartDefect('part-cote-d', 'Côté Droit')"/>
+              <rect id="part-cote-d" class="car-part" x="0" y="10" width="180" height="80" rx="15" onclick="togglePartDefect('part-cote-d')"/>
               <text x="90" y="55" fill="#fff" font-size="12" text-anchor="middle" pointer-events="none">CÔTÉ DROIT</text>
             </g>
-            <!-- VUE ARRIÈRE -->
             <g transform="translate(340, 20)">
-              <rect id="part-arriere" class="car-part" x="0" y="20" width="100" height="60" rx="10" onclick="togglePartDefect('part-arriere', 'Arrière / Coffre')"/>
+              <rect id="part-arriere" class="car-part" x="0" y="20" width="100" height="60" rx="10" onclick="togglePartDefect('part-arriere')"/>
               <text x="50" y="55" fill="#fff" font-size="12" text-anchor="middle" pointer-events="none">ARRIÈRE</text>
             </g>
-            <!-- VUE DESSOUS -->
             <g transform="translate(460, 20)">
-              <rect id="part-dessous" class="car-part" x="0" y="10" width="110" height="180" rx="10" onclick="togglePartDefect('part-dessous', 'Sous Caisse / Chassis')"/>
+              <rect id="part-dessous" class="car-part" x="0" y="10" width="110" height="180" rx="10" onclick="togglePartDefect('part-dessous')"/>
               <text x="55" y="95" fill="#fff" font-size="12" text-anchor="middle" pointer-events="none">DESSOUS</text>
             </g>
           </svg>
         </div>
       </div>
 
-      <!-- 3. CONTRÔLE CARROSSERIE & EXTÉRIEUR -->
       <div class="card">
         <h2>3. Tour du Véhicule — Carrosserie & Extérieur</h2>
         <div id="container-carrosserie"></div>
       </div>
 
-      <!-- 4. COMPARTIMENT MOTEUR -->
       <div class="card">
         <h2>4. Contrôle Compartiment Moteur</h2>
         <div id="container-moteur"></div>
       </div>
 
-      <!-- 5. CONTRÔLE FONCTIONNEL & MÉCANIQUE -->
-        <div class="card">
+      <div class="card">
         <h2>5. Contrôle Fonctionnel & Organes</h2>
         <div id="container-mecanique"></div>
       </div>
 
-      <!-- 6. HABITACLE ET INTÉRIEUR -->
       <div class="card">
         <h2>6. Habitacle & Équipements Intérieurs</h2>
         <div id="container-habitacle"></div>
       </div>
 
-      <!-- 7. DESSOUS DU VÉHICULE (ÉCRAN CRITIQUE) -->
       <div class="card highlight">
         <h2 style="color: var(--primary);">7. Inspection Visuelle du Dessous du Véhicule</h2>
-        <p style="font-size: 0.85rem; color: #ff8a80; margin-bottom: 12px; font-weight: bold;">
-          ⚠️ Inspection effectuée impérativement avec le client autour / sous le véhicule.
-        </p>
         <div id="container-dessous"></div>
       </div>
 
-      <!-- 8. ESSAI ROUTIER -->
       <div class="card">
-        <h2>8. Essai du Véhicule sur Route</h2>
+        <h2>8. Essai Routier</h2>
         <div class="check-grid">
-          <label class="check-item"><input type="checkbox" id="essai_fait" onchange="autoSave()"> Essai routier effectué avec le client</label>
-          <label class="check-item"><input type="checkbox" id="essai_froid" onchange="autoSave()"> Démarrage à froid contrôlé</label>
-          <label class="check-item"><input type="checkbox" id="essai_frein" onchange="autoSave()"> Freinage contrôlé</label>
-          <label class="check-item"><input type="checkbox" id="essai_dir" onchange="autoSave()"> Direction contrôlée</label>
-          <label class="check-item"><input type="checkbox" id="essai_boite" onchange="autoSave()"> Boîte de vitesses contrôlée</label>
-          <label class="check-item"><input type="checkbox" id="essai_emb" onchange="autoSave()"> Embrayage contrôlé</label>
-          <label class="check-item"><input type="checkbox" id="essai_acc" onchange="autoSave()"> Accélération contrôlée</label>
-          <label class="che
+          <label class="check-item"><input type="checkbox" id="essai_fait"> Essai routier effectué avec le client</label>
+          <label class="check-item"><input type="checkbox" id="essai_frein"> Freinage contrôlé</label>
+          <label class="check-item"><input type="checkbox" id="essai_dir"> Direction contrôlée</label>
+          <label class="check-item"><input type="checkbox" id="essai_boite"> Boîte de vitesses contrôlée</label>
+        </div>
+        <div style="margin-top: 12px;">
+          <label>Observations pendant l'essai routier</label>
+          <textarea id="essai_obs"></textarea>
+        </div>
+      </div>
 
+      <div class="card">
+        <h2>9. Travaux Réalisés & Réserves</h2>
+        <label>Travaux / Entretiens effectués avant livraison</label>
+        <textarea id="travaux_faits"></textarea>
 
+        <label style="margin-top: 15px; color: var(--warning); font-weight: bold;">DÉFAUTS ET RÉSERVES SIGNALÉS AU CLIENT</label>
+        <textarea id="defauts_reserves"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>10. Photos du Véhicule</h2>
+        <div class="no-print">
+          <input type="file" id="photo-input" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoUpload(this)">
+          <button class="btn btn-secondary" type="button" onclick="document.getElementById('photo-input').click()">📷 Ajouter une Photo</button>
+        </div>
+        <div id="photo-gallery" class="photo-grid"></div>
+      </div>
+
+      <div class="card highlight">
+        <h2>11. Validation & Signatures</h2>
+        <p style="font-size: 0.8rem; color: #ddd; margin-bottom: 15px;">
+          Le véhicule a été présenté au client avant livraison. Un tour complet a été effectué.
+        </p>
+        <div class="grid-2">
+          <div>
+            <label>SIGNATURE DU CLIENT</label>
+            <canvas id="sig-client" class="signature-pad"></canvas>
+            <button class="btn btn-secondary btn-small no-print" type="button" onclick="clearCanvas('sig-client')" style="margin-top: 5px;">Effacer</button>
+          </div>
+          <div>
+            <label>SIGNATURE ELSASS TURBO AUTO</label>
+            <canvas id="sig-pro" class="signature-pad"></canvas>
+            <button class="btn btn-secondary btn-small no-print" type="button" onclick="clearCanvas('sig-pro')" style="margin-top: 5px;">Effacer</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card no-print">
+        <button class="btn btn-success" type="button" onclick="prepareAndPrint()" style="font-size: 1.2rem; padding: 20px;">🖨 IMPRIMER / ENREGISTRER PDF</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="print-only print-footer">
+    Elsass Turbo Auto — Fiche de livraison véhicule — Document généré le <span id="print-date-footer"></span>
+  </div>
+
+  <script>
+    const SECTIONS_DATA = {
+      carrosserie: ["Pare-chocs avant", "Capot", "Phare gauche", "Phare droit", "Aile avant gauche", "Aile avant droite", "Porte avant gauche", "Porte arrière gauche", "Bas de caisse gauche", "Rétroviseur gauche", "Pare-chocs arrière", "Coffre / Hayon", "Porte avant droite", "Porte arrière droite", "Bas de caisse droit", "Rétroviseur droit"],
+      moteur: ["État général moteur", "Fuites visibles (huile/eau)", "Niveau d'huile", "Liquide de refroidissement", "Liquide de frein", "Batterie", "Courroies / Chaîne"],
+      mecanique: ["Démarrage & Ralenti", "Accélération", "Freinage & Frein à main", "Direction", "Embrayage & Boîte de vitesses", "Suspensions", "Éclairage & Clignotants", "Climatisation"],
+      habitacle: ["Siège conducteur", "Siège passager & Arrière", "Tableau de bord & Volant", "Garnitures de portes", "Moquettes & Tapis"],
+      dessous: ["Carter moteur & Boîte", "Ligne d'échappement", "Protections sous moteur", "Trains roulants", "Corrosion / Chocs"]
+    };
+
+    let currentFiche = { id: null, date: new Date().toLocaleDateString('fr-FR'), photos: [] };
+
+    function renderControlSection(containerId, items) {
+      const container = document.getElementById(containerId);
+      if(!container) return;
+      container.innerHTML = items.map((item, idx) => {
+        const itemId = containerId + '_' + idx;
+        return `
+          <div class="item-control">
+            <div class="item-header">
+              <span class="item-title">${item}</span>
+              <div class="status-group" id="group_${itemId}">
+                <button type="button" class="btn-status bon active" onclick="setStatus('${itemId}', 'bon')">🟢 Bon</button>
+                <button type="button" class="btn-status defaut" onclick="setStatus('${itemId}', 'defaut')">🟠 Défaut</button>
+                <button type="button" class="btn-status endommage" onclick="setStatus('${itemId}', 'endommage')">🔴 Anormal</button>
+              </div>
+            </div>
+            <div class="defect-details" id="details_${itemId}">
+              <input type="text" id="obs_${itemId}" placeholder="Précisez le défaut...">
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setStatus(itemId, status) {
+      const group = document.getElementById('group_' + itemId);
+      if(!group) return;
+      group.querySelectorAll('.btn-status').forEach(b => b.classList.remove('active'));
+      group.querySelector('.' + status).classList.add('active');
+      const details = document.getElementById('details_' + itemId);
+      if(details) {
+        if (status === 'defaut' || status === 'endommage') details.classList.add('show');
+        else details.classList.remove('show');
+      }
+    }
+
+    function togglePartDefect(partId) {
+      const element = document.getElementById(partId);
+      if(element) element.classList.toggle('has-defect');
+    }
+
+    function handlePhotoUpload(input) {
+      if (!input.f
